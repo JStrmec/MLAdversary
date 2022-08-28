@@ -10,7 +10,7 @@ Team Members: Abrhiram Bondada, Oscasavia Birugi, Noah Howell, Nathan Waltz, Joc
 
 **Project Steps**
 
-- [ ] 1. Train Resnet50 of Image Dataset 
+- [ ] 1. Build Resnet50 and train on Image Dataset 
 
 - [ ] 2. Using Foolbox, create random noise and adversarial data to reduce accuracy of Resnet Classifier
 
