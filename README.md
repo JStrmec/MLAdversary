@@ -4,7 +4,7 @@ Team Name: CIA
 
 Team Contact: Jocelyn Strmec, jocelyn.strmec@wsu.edu
 
-Team Members: Abrhiram Bondada, Oscasavia Birugi, Noah Howell, Nathan Waltz, Jocelyn Strmec
+Team Members: Abrhiram Bondada, Oscasavia Birugi, Noah Howell, Nathan Waltz (Development Lead Engineer), Jocelyn Strmec
 
 ![image](https://user-images.githubusercontent.com/70173190/187054591-56b43cfc-ee6c-44de-922b-3a6eadb9b1ab.png)
 
@@ -36,7 +36,7 @@ Then, you will want to run the environment setup script!
 
 Afterwards, you will want to build the Docker container as follows:
 
-`$ docker build -t ml_adversary .`
+`$ sudo docker build -t ml_adversary .`
 
 Then, you can access the environment as follows:
 
