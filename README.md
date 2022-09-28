@@ -1,34 +1,26 @@
 # MLAdversary
 
+Develop various adversarial attacks against an image classifier to drastically reduce its performance, followed by improving its adversarial robustness. 
+
 Team Name: CIA
 
 Team Contact: Jocelyn Strmec, jocelyn.strmec@wsu.edu
 
 Team Members: Abrhiram Bondada, Oscasavia Birugi, Noah Howell, Nathan Waltz (Development Lead Engineer), Jocelyn Strmec
 
-![image](https://user-images.githubusercontent.com/70173190/187054591-56b43cfc-ee6c-44de-922b-3a6eadb9b1ab.png)
+![Team Information](https://user-images.githubusercontent.com/70173190/187054591-56b43cfc-ee6c-44de-922b-3a6eadb9b1ab.png)
 
-**Project Steps**
+## Project Steps
 
-- [ ] 1. Build a CNN and train it on an image dataset.
+- [X] 1. Build a CNN and train it on an image dataset.
 
 - [ ] 2. Using Foolbox, create random noise and adversarial data to reduce accuracy of the CNN.
 
 - [ ] 3. Train on adversarial data to increase accuracy of the CNN model.
 
+## Startup Instructions
 
-**Project Resources**
-- https://github.com/bethgelab/foolbox
-
-- https://foolbox.readthedocs.io/en/stable/modules/attacks.html 
-
------------------------------------------------------------
-
-MLAdversary : Develop various adversarial attacks against an image classifier to drastically reduce its performance, followed by improving its adversarial robustness
-
-This is the repository containing the code of the ML adversary project for Cpts 428.
-
-In order to run this repository, you will want to follow the instructions to install Tensorflow's Docker container [here](https://www.tensorflow.org/install/docker). 
+In order to run this repository, you will want to first install Docker and then follow the instructions to install Tensorflow's Docker container [here](https://www.tensorflow.org/install/docker). This is by far the easiest way to get Tensorflow all set up, and some convenience scripts were written to streamline this setup process for you. 
 
 Then, you will want to run the environment setup script!
 
@@ -50,3 +42,9 @@ $ sudo docker run \
        -v "$(pwd)"/saved_models,target=/home/ml_adversary/saved_models \
        ml_adversary bash
 ```
+
+## Project Resources
+
+- https://github.com/bethgelab/foolbox
+
+- https://foolbox.readthedocs.io/en/stable/modules/attacks.html 
