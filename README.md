@@ -43,6 +43,10 @@ $ sudo docker run \
        ml_adversary bash
 ```
 
+Finally, run...
+
+`$ python main.py`
+
 ## Project Resources
 
 - https://github.com/bethgelab/foolbox
