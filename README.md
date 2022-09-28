@@ -20,7 +20,7 @@ Team Members: Abrhiram Bondada, Oscasavia Birugi, Noah Howell, Nathan Waltz (Dev
 
 ## Startup Instructions
 
-In order to run this repository, you will want to first install Docker and then follow the instructions to install Tensorflow's Docker container [here](https://www.tensorflow.org/install/docker). This is by far the easiest way to get Tensorflow all set up, and some convenience scripts were written to streamline this setup process for you. 
+In order to run this repository, you will want to first install some version of Python 3 (it doesn't matter since you will be running this in a Docker container anyways, just used for the startup script) and Docker, then follow the instructions to install Tensorflow's Docker container [here](https://www.tensorflow.org/install/docker). This is by far the easiest way to get Tensorflow all set up, and some convenience scripts were written to streamline this setup process for you. 
 
 Then, you will want to run the environment setup script!
 
