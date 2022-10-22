@@ -20,13 +20,16 @@ project_data = project_data_loader.load_data()
 model = Model(project_config)
 
 # Jocelyn - You will need to either load a model from the saved weights or train a model
-# history = model.fit_model(project_data.train, project_data.validation, "saved_models/model")
-history = None
+history = model.fit_model(project_data.train, project_data.validation, "saved_models/model")
+#history = None
 
 # this is just testing to make sure we can get foolbox to work, lets provide some
 # analysis about the attack's effectiveness - examples in the book
 attack_history = model.linf_projected_gradient_descent_attack(project_data.train)
-print(attack_history)
+
+# Attack Analysis
+# print attack history
+attack_history.print()
 
 if not history:
     sys.exit(1)

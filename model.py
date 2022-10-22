@@ -7,6 +7,7 @@ happens.
 import os
 import random
 from typing import Any, Optional, Tuple
+from attack_history import AttackHistory
 from config_loader import Config
 import tensorflow as tf
 import foolbox as fb
@@ -177,7 +178,7 @@ class Model:
         )
         return image, label
 
-    def linf_projected_gradient_descent_attack(self, data: tf.data.Dataset):
+    def linf_projected_gradient_descent_attack(self, data: tf.data.Dataset) -> AttackHistory:
         """
         Performs a Linf Projected Gradient Descent Attack.
 
@@ -205,7 +206,7 @@ class Model:
 
         # define the foolbox model and attack - make sure this is trained...
         foolbox_model = fb.TensorFlowModel(self.model, bounds=(0, 255))
-
+     
         # define the attack
         attack = fb.attacks.LinfPGD()
         image, label = self._random_batch_from_tf_dataset(data)
@@ -214,4 +215,4 @@ class Model:
         )
 
         # TODO - provide analysis, perhaps in main...
-        return raw_advs, clipped_advs, success
+        return AttackHistory(raw_advs, clipped_advs, success, epsilons, foolbox_model, image, label)
