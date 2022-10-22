@@ -18,6 +18,7 @@ class DatasetConfig:
     Be sure to add attributes to this class as you add attributes
     to model.toml.
     """
+
     image_width: int
     image_height: int
     seed: int
@@ -37,6 +38,7 @@ class ModelConfig:
     Be sure to add attributes to this class as you add attributes
     to model.toml.
     """
+
     batch_size: int
     seed: int
     learning_rate: float
@@ -53,6 +55,7 @@ class Config:
     """
     The sum of all the different parts of configuration.
     """
+
     dataset_config: DatasetConfig
     model_config: ModelConfig
 
@@ -70,7 +73,7 @@ class ConfigLoader:
         :param config_path: THe absolute path to the configuration file.
         """
         self._config_path = config_path
-        with open(config_path, 'rb') as config_handle:
+        with open(config_path, "rb") as config_handle:
             self._raw_config_data = tomli.load(config_handle)
         self.config = Config(self._read_dataset_config(), self._read_model_config())
 

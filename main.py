@@ -23,7 +23,7 @@ model = Model(project_config)
 # history = model.fit_model(project_data.train, project_data.validation, "saved_models/model")
 history = None
 
-# this is just testing to make sure we can get foolbox to work, lets provide some 
+# this is just testing to make sure we can get foolbox to work, lets provide some
 # analysis about the attack's effectiveness - examples in the book
 attack_history = model.linf_projected_gradient_descent_attack(project_data.train)
 print(attack_history)

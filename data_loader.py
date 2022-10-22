@@ -20,6 +20,7 @@ class ModelData:
     Class for keeping track of different pieces of data,
     include training, testing, and validation data.
     """
+
     train: tf.data.Dataset
     train_labels: tf.data.Dataset
     validation: tf.data.Dataset
@@ -32,7 +33,9 @@ class DataLoader:
     that is stored on the disk into RAM.
     """
 
-    def __init__(self, config: Config, directory: os.PathLike = "data/PetImages/") -> None:
+    def __init__(
+        self, config: Config, directory: os.PathLike = "data/PetImages/"
+    ) -> None:
         """
         Initializes a new instance of the DataLoader class.
 
@@ -42,7 +45,9 @@ class DataLoader:
         self.directory = directory
         self.config = config
 
-    def load_data(self, transformation: Optional[tf.keras.Sequential] = None) -> ModelData:
+    def load_data(
+        self, transformation: Optional[tf.keras.Sequential] = None
+    ) -> ModelData:
         """
         Loads the data from the directory into memory.
 
@@ -67,37 +72,50 @@ class DataLoader:
         training_image_dataset = tf.keras.preprocessing.image_dataset_from_directory(
             self.directory,
             labels="inferred",
-            label_mode='binary',
+            label_mode="binary",
             color_mode="rgb",
             batch_size=self.config.model_config.batch_size,
-            image_size=(self.config.dataset_config.image_width, self.config.dataset_config.image_height),
+            image_size=(
+                self.config.dataset_config.image_width,
+                self.config.dataset_config.image_height,
+            ),
             shuffle=True,
             seed=self.config.dataset_config.seed,
             validation_split=self.config.dataset_config.validation_split,
             subset="training",
-            interpolation="bilinear")
+            interpolation="bilinear",
+        )
 
         validation_image_dataset = tf.keras.preprocessing.image_dataset_from_directory(
             self.directory,
             labels="inferred",
-            label_mode='binary',
+            label_mode="binary",
             color_mode="rgb",
             batch_size=self.config.model_config.batch_size,
-            image_size=(self.config.dataset_config.image_width, self.config.dataset_config.image_height),
+            image_size=(
+                self.config.dataset_config.image_width,
+                self.config.dataset_config.image_height,
+            ),
             shuffle=True,
             seed=self.config.dataset_config.seed,
             validation_split=self.config.dataset_config.validation_split,
             subset="validation",
-            interpolation="bilinear")
+            interpolation="bilinear",
+        )
 
         # perform transformation on training data
         if transformation is not None:
             training_image_dataset.map(lambda x, y: (transformation(x), y))
 
         # prefetch some images
-        #training_image_dataset = training_image_dataset.prefetch(self.config.model_config.batch_size)
-        #validation_image_dataset = validation_image_dataset.prefetch(self.config.model_config.batch_size)
-        return ModelData(training_image_dataset, training_image_dataset.class_names, validation_image_dataset,validation_image_dataset.class_names)
+        # training_image_dataset = training_image_dataset.prefetch(self.config.model_config.batch_size)
+        # validation_image_dataset = validation_image_dataset.prefetch(self.config.model_config.batch_size)
+        return ModelData(
+            training_image_dataset,
+            training_image_dataset.class_names,
+            validation_image_dataset,
+            validation_image_dataset.class_names,
+        )
 
 
 def image_is_corrupt(image_path: os.PathLike):

@@ -156,7 +156,9 @@ class Model:
         self.model.load_weights(path)
 
     @staticmethod
-    def _random_batch_from_tf_dataset(data: tf.data.Dataset, seed: int = 0) -> Tuple[ep.types.NativeTensor, ep.types.NativeTensor]:
+    def _random_batch_from_tf_dataset(
+        data: tf.data.Dataset, seed: int = 0
+    ) -> Tuple[ep.types.NativeTensor, ep.types.NativeTensor]:
         """
         Takes a random batch from a tf_dataset.
         """
@@ -170,9 +172,7 @@ class Model:
         )
         return image, label
 
-    def linf_projected_gradient_descent_attack(
-        self, data: tf.data.Dataset
-    ):
+    def linf_projected_gradient_descent_attack(self, data: tf.data.Dataset):
         """
         Attacks the model using the foolbox library.
         """
