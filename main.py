@@ -19,7 +19,7 @@ project_data = project_data_loader.load_data()
 model = Model(project_config)
 #history = model.fit_model(project_data.train, project_data.validation, "saved_models/model")
 
-attack_history = model.attack_model(project_data.train,project_data.train_labels, 0.1)
+attack_history = model.attack_model(project_data.train,project_data.train_labels)
 print(attack_history)
 
 # plotting code sourced from https://keras.io/examples/vision/3D_image_classification/

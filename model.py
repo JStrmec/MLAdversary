@@ -132,15 +132,17 @@ class Model:
 
         self.model.load_weights(path)
 
-    def attack_model(self, training_data: tf.data.Dataset,training_labels:tf.data.Dataset, epsilon):
+    def attack_model(self, data: tf.data.Dataset,labels:tf.data.Dataset):
         """
         Attacks the model using the foolbox library.
         """
-        #labels = [0,1]
+        # epsilons
+        fgsm_epsilons = np.linspace(0.02, 0.02, num=1)
         fmodel = fb.TensorFlowModel(self.model, bounds=(0, 1))
         #fast gradient sign method
         attack = fb.attacks.FGSM()
-        adversarial = attack(fmodel, training_data.as_numpy_iterator, training_labels, epsilons=epsilon)
+        index, (image, label) = next(enumerate(data))
+        adversarial = attack(fmodel,image, labels, epsilons=fgsm_epsilons)
         # inversion attack
         # inversion = fb.attacks.InversionAttack(distance=fb.distances.LpDistance(float('inf')))
         # salt and pepper noise attack
