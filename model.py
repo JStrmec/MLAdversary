@@ -137,12 +137,12 @@ class Model:
         Attacks the model using the foolbox library.
         """
         # epsilons
-        fgsm_epsilons = np.linspace(0.02, 0.02, num=1)
+        epsilons = [0.0,0.0002,0.0005,0.0008, 0.001,0.0015, 0.002,0.003,0.01,0.1,0.3,0.5,1.0,]#np.linspace(0.0, 0.02, num=1)
         fmodel = fb.TensorFlowModel(self.model, bounds=(0, 1))
         #fast gradient sign method
         attack = fb.attacks.FGSM()
         index, (image, label) = next(enumerate(data))
-        adversarial = attack(fmodel,image, labels, epsilons=fgsm_epsilons)
+        adversarial = attack(fmodel,image, labels, epsilons=epsilons)
         # inversion attack
         # inversion = fb.attacks.InversionAttack(distance=fb.distances.LpDistance(float('inf')))
         # salt and pepper noise attack
