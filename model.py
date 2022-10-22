@@ -161,6 +161,11 @@ class Model:
     ) -> Tuple[ep.types.NativeTensor, ep.types.NativeTensor]:
         """
         Takes a random batch from a tf_dataset.
+
+        :param data: The Tensorflow dataset that is being used.
+        :param seed: The random seed.
+
+        :return: A tuple containing a batch of images and labels.
         """
         random.seed(seed)
         index = random.randint(0, len(data) - 1)
@@ -174,7 +179,12 @@ class Model:
 
     def linf_projected_gradient_descent_attack(self, data: tf.data.Dataset):
         """
-        Attacks the model using the foolbox library.
+        Performs a Linf Projected Gradient Descent Attack.
+
+        :param data: The data to use to attack the model. 
+
+        TODO - update return parameter and type with actual type and information
+               on things that are being returned.
         """
         # epsilons
         epsilons = [
@@ -203,6 +213,5 @@ class Model:
             foolbox_model, image, label, epsilons=epsilons
         )
 
-        # TODO - provide analysis
-
+        # TODO - provide analysis, perhaps in main...
         return raw_advs, clipped_advs, success
