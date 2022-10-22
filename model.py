@@ -5,11 +5,12 @@ This is where the actual task of binary classification
 happens.
 """
 import os
-from typing import Any, Optional
+import random
+from typing import Any, Optional, Tuple
 from config_loader import Config
 import tensorflow as tf
 import foolbox as fb
-import numpy as np 
+import eagerpy as ep
 
 
 class ConvolutionalBlock(tf.keras.Model):
@@ -18,7 +19,13 @@ class ConvolutionalBlock(tf.keras.Model):
     neural network that we are building.
     """
 
-    def __init__(self, num_filters: int, kernel_size: int, pool_size: int, activation: tf.keras.activations) -> None:
+    def __init__(
+        self,
+        num_filters: int,
+        kernel_size: int,
+        pool_size: int,
+        activation: tf.keras.activations,
+    ) -> None:
         """
         Initializes a new instance of the ConvolutionalBlock.
 
@@ -28,7 +35,9 @@ class ConvolutionalBlock(tf.keras.Model):
         :param activation: The activation function to use.
         """
         super(ConvolutionalBlock, self).__init__()
-        self.conv_2d = tf.keras.layers.Conv2D(filters=num_filters, kernel_size=kernel_size)
+        self.conv_2d = tf.keras.layers.Conv2D(
+            filters=num_filters, kernel_size=kernel_size
+        )
         self.max_pool_2d = tf.keras.layers.MaxPool2D(pool_size=pool_size)
         self.batch_normalization = tf.keras.layers.BatchNormalization()
         self.activation = activation
@@ -62,9 +71,15 @@ class Model:
         :param model_path: The absolute path to a saved model.
         """
         self.config = config
-        self.model = tf.keras.Sequential([
+        self.model = tf.keras.Sequential(
+            [
                 tf.keras.layers.Input(
-                    (self.config.dataset_config.image_width, self.config.dataset_config.image_height, 3)),
+                    (
+                        self.config.dataset_config.image_width,
+                        self.config.dataset_config.image_height,
+                        3,
+                    )
+                ),
                 ConvolutionalBlock(32, 3, 2, tf.keras.activations.relu),
                 ConvolutionalBlock(32, 3, 2, tf.keras.activations.relu),
                 ConvolutionalBlock(64, 3, 2, tf.keras.activations.relu),
@@ -72,18 +87,26 @@ class Model:
                 tf.keras.layers.GlobalAveragePooling2D(),
                 tf.keras.layers.Dense(units=1024, activation=tf.keras.activations.relu),
                 tf.keras.layers.Dropout(0.3),
-                tf.keras.layers.Dense(units=1, activation=tf.keras.activations.sigmoid)]
-            )
+                tf.keras.layers.Dense(units=2, activation=tf.keras.activations.softmax),
+            ]
+        )
         self.model.compile(
-            loss="binary_crossentropy",
-            optimizer=tf.keras.optimizers.Adam(learning_rate=config.model_config.learning_rate),
+            loss="sparse_categorical_crossentropy",
+            optimizer=tf.keras.optimizers.Adam(
+                learning_rate=config.model_config.learning_rate
+            ),
             metrics=["accuracy"],
         )
 
         if model_path:
             self._load_model(model_path)
 
-    def fit_model(self, training_data: tf.data.Dataset, validation_data: tf.data.Dataset, save_directory: Optional[os.PathLike] = None) -> tf.keras.callbacks.History:
+    def fit_model(
+        self,
+        training_data: tf.data.Dataset,
+        validation_data: tf.data.Dataset,
+        save_directory: Optional[os.PathLike] = None,
+    ) -> tf.keras.callbacks.History:
         """
         Fits the model on training data. We are using an early stopping callback
         to stop training if necessary.
@@ -108,7 +131,7 @@ class Model:
             epochs=self.config.model_config.num_epochs,
             callbacks=callbacks,
             batch_size=self.config.model_config.batch_size,
-            validation_batch_size=self.config.model_config.batch_size
+            validation_batch_size=self.config.model_config.batch_size,
         )
         return history
 
@@ -118,7 +141,7 @@ class Model:
 
         :param data: The data to make predictions on.
         """
-        
+
         return self.model.predict(data)
 
     def _load_model(self, path: os.PathLike) -> None:
@@ -132,27 +155,54 @@ class Model:
 
         self.model.load_weights(path)
 
-    def attack_model(self, data: tf.data.Dataset,labels:tf.data.Dataset):
+    @staticmethod
+    def _random_batch_from_tf_dataset(data: tf.data.Dataset, seed: int = 0) -> Tuple[ep.types.NativeTensor, ep.types.NativeTensor]:
+        """
+        Takes a random batch from a tf_dataset.
+        """
+        random.seed(seed)
+        index = random.randint(0, len(data) - 1)
+        data = data.skip(index)
+        image, label = next(data.as_numpy_iterator())
+        image = ep.astensor(tf.convert_to_tensor(image))
+        label = ep.astensor(
+            tf.reshape(tf.convert_to_tensor(label, dtype=tf.int64), [-1])
+        )
+        return image, label
+
+    def linf_projected_gradient_descent_attack(
+        self, data: tf.data.Dataset
+    ):
         """
         Attacks the model using the foolbox library.
         """
         # epsilons
-        epsilons = [0.0,0.0002,0.0005,0.0008, 0.001,0.0015, 0.002,0.003,0.01,0.1,0.3,0.5,1.0,]#np.linspace(0.0, 0.02, num=1)
-        fmodel = fb.TensorFlowModel(self.model, bounds=(0, 1))
-        #fast gradient sign method
-        attack = fb.attacks.FGSM()
-        index, (image, label) = next(enumerate(data))
-        adversarial = attack(fmodel,image, labels, epsilons=epsilons)
-        # inversion attack
-        # inversion = fb.attacks.InversionAttack(distance=fb.distances.LpDistance(float('inf')))
-        # salt and pepper noise attack
-        # sapn = fb.attacks.SaltAndPepperNoiseAttack()
+        epsilons = [
+            0.0,
+            0.0002,
+            0.0005,
+            0.0008,
+            0.001,
+            0.0015,
+            0.002,
+            0.003,
+            0.01,
+            0.1,
+            0.3,
+            0.5,
+            1.0,
+        ]
 
-        # # run attack
-        # raw, fgsm_advs_list, success = fgsm(self.model, data, labels, epsilons=epsilons)
-        # print("FGSM: ",raw, fgsm_advs_list, success)
-        # raw, inv_advs_list, success = inversion(self.model, data, labels, epsilons=epsilons)
-        # print("INV: ",raw, inv_advs_list, success)
-        # raw, sapn_advs_list, success = sapn(self.model, data, labels, epsilons=epsilons)
-        # print("SAPN: ",raw, sapn_advs_list, success)
-        return adversarial
+        # define the foolbox model and attack - make sure this is trained...
+        foolbox_model = fb.TensorFlowModel(self.model, bounds=(0, 255))
+
+        # define the attack
+        attack = fb.attacks.LinfPGD()
+        image, label = self._random_batch_from_tf_dataset(data)
+        raw_advs, clipped_advs, success = attack(
+            foolbox_model, image, label, epsilons=epsilons
+        )
+
+        # TODO - provide analysis
+
+        return raw_advs, clipped_advs, success

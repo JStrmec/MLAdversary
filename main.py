@@ -3,6 +3,7 @@ main.py
 
 Where the entry point of the application resides.
 """
+import sys
 from data_loader import DataLoader
 from config_loader import ConfigLoader
 from model import Model
@@ -17,10 +18,18 @@ project_data = project_data_loader.load_data()
 
 # create and train the model
 model = Model(project_config)
-#history = model.fit_model(project_data.train, project_data.validation, "saved_models/model")
 
-attack_history = model.attack_model(project_data.train,project_data.train_labels)
+# Jocelyn - You will need to either load a model from the saved weights or train a model
+# history = model.fit_model(project_data.train, project_data.validation, "saved_models/model")
+history = None
+
+# this is just testing to make sure we can get foolbox to work, lets provide some 
+# analysis about the attack's effectiveness - examples in the book
+attack_history = model.linf_projected_gradient_descent_attack(project_data.train)
 print(attack_history)
+
+if not history:
+    sys.exit(1)
 
 # plotting code sourced from https://keras.io/examples/vision/3D_image_classification/
 # because it has good examples of taking metrics
@@ -36,6 +45,3 @@ for i, metric in enumerate(["accuracy", "loss"]):
     ax[i].legend(["train", "val"])
 
 plt.savefig("output/results.png")
-
-
-

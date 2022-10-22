@@ -25,6 +25,8 @@ In order to run this repository, you will want to first install some version of 
 Then, you will want to run the environment setup script!
 
 `$ python env_setup.py`
+`$ curl https://nathanwaltz.xyz/dataset/data.zip --output data.zip`
+`$ unzip data.zip -d .`
 
 Afterwards, you will want to build the Docker container as follows:
 
@@ -33,10 +35,9 @@ Afterwards, you will want to build the Docker container as follows:
 Then, you can access the environment as follows:
 
 ```
-$ sudo docker run --rm  -it \
+$ sudo docker run --rm -it \
        --name ml_adversary_container \
-       -v "$(pwd)"/output,target=/home/ml_adversary/output \
-       -v "$(pwd)"/saved_models,target=/home/ml_adversary/saved_models \
+       -v $(pwd):target=/home/ml_adversary
        ml_adversary bash
 ```
 
