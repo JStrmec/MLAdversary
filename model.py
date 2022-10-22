@@ -6,10 +6,10 @@ happens.
 """
 import os
 from typing import Any, Optional
-
-import tensorflow as tf
-
 from config_loader import Config
+import tensorflow as tf
+import foolbox as fb
+import numpy as np 
 
 
 class ConvolutionalBlock(tf.keras.Model):
@@ -118,6 +118,7 @@ class Model:
 
         :param data: The data to make predictions on.
         """
+        
         return self.model.predict(data)
 
     def _load_model(self, path: os.PathLike) -> None:
@@ -130,3 +131,31 @@ class Model:
             return
 
         self.model.load_weights(path)
+
+    def attack_model(self, training_data: tf.data.Dataset,training_labels:tf.data.Dataset, epsilon):
+        """
+        Attacks the model using the foolbox library.
+        """
+        #labels = [0,1]
+        fmodel = fb.TensorFlowModel(self.model, bounds=(0, 1))
+        #fast gradient sign method
+        attack = fb.attacks.FGSM()
+        adversarial = attack(fmodel, training_data.as_numpy_iterator, training_labels, epsilons=epsilon)
+        # inversion attack
+        # inversion = fb.attacks.InversionAttack(distance=fb.distances.LpDistance(float('inf')))
+        # salt and pepper noise attack
+        # sapn = fb.attacks.SaltAndPepperNoiseAttack()
+
+        # # set attack parameters
+        # fgsm_epsilons = np.linspace(0.02, 0.02, num=1)
+        # inv_epsilons = np.linspace(10, 10, num=1)
+        # sapn_epsilons = np.linspace(80, 80, num=1)
+
+        # # run attack
+        # raw, fgsm_advs_list, success = fgsm(self.model, data, [], epsilons=fgsm_epsilons)
+        # print("FGSM: ",raw, fgsm_advs_list, success)
+        # raw, inv_advs_list, success = inversion(self.model, data, [], epsilons=inv_epsilons)
+        # print("INV: ",raw, inv_advs_list, success)
+        # raw, sapn_advs_list, success = sapn(self.model, data, [], epsilons=sapn_epsilons)
+        # print("SAPN: ",raw, sapn_advs_list, success)
+        return adversarial

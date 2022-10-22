@@ -13,4 +13,4 @@ test_split = 0.5
 seed = 42
 batch_size = 20
 learning_rate = 0.01
-num_epochs = 20
+num_epochs = 5

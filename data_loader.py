@@ -9,6 +9,7 @@ from typing import Optional
 
 import tensorflow as tf
 from dataclasses import dataclass
+import numpy as np
 
 from config_loader import Config
 
@@ -20,7 +21,9 @@ class ModelData:
     include training, testing, and validation data.
     """
     train: tf.data.Dataset
+    train_labels: tf.data.Dataset
     validation: tf.data.Dataset
+    validation_labels: tf.data.Dataset
 
 
 class DataLoader:
@@ -61,11 +64,10 @@ class DataLoader:
         :return: ModelData - A de-facto struct containing
                  various data that can be consumed by the Keras later.
         """
-        training_image_dataset: tf.data.Dataset = tf.keras.preprocessing.image_dataset_from_directory(
+        training_image_dataset = tf.keras.preprocessing.image_dataset_from_directory(
             self.directory,
             labels="inferred",
             label_mode='binary',
-            class_names=None,
             color_mode="rgb",
             batch_size=self.config.model_config.batch_size,
             image_size=(self.config.dataset_config.image_width, self.config.dataset_config.image_height),
@@ -75,11 +77,10 @@ class DataLoader:
             subset="training",
             interpolation="bilinear")
 
-        validation_image_dataset: tf.data.Dataset = tf.keras.preprocessing.image_dataset_from_directory(
+        validation_image_dataset = tf.keras.preprocessing.image_dataset_from_directory(
             self.directory,
             labels="inferred",
             label_mode='binary',
-            class_names=None,
             color_mode="rgb",
             batch_size=self.config.model_config.batch_size,
             image_size=(self.config.dataset_config.image_width, self.config.dataset_config.image_height),
@@ -94,9 +95,9 @@ class DataLoader:
             training_image_dataset.map(lambda x, y: (transformation(x), y))
 
         # prefetch some images
-        training_image_dataset = training_image_dataset.prefetch(self.config.model_config.batch_size)
-        validation_image_dataset = validation_image_dataset.prefetch(self.config.model_config.batch_size)
-        return ModelData(training_image_dataset, validation_image_dataset)
+        #training_image_dataset = training_image_dataset.prefetch(self.config.model_config.batch_size)
+        #validation_image_dataset = validation_image_dataset.prefetch(self.config.model_config.batch_size)
+        return ModelData(training_image_dataset, training_image_dataset.class_names, validation_image_dataset,validation_image_dataset.class_names)
 
 
 def image_is_corrupt(image_path: os.PathLike):

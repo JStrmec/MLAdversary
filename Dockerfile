@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:latest-gpu
+FROM tensorflow/tensorflow:latest
 
 # copy the files to the directory
 COPY . /home/ml_adversary
@@ -7,6 +7,7 @@ WORKDIR /home/ml_adversary
 
 # copy the dataset
 RUN curl https://nathanwaltz.xyz/dataset/data.zip --output data.zip
+RUN apt install unzip zip
 RUN unzip data.zip -d .
 
 # create the directories if they don't exist

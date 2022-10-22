@@ -33,16 +33,12 @@ Afterwards, you will want to build the Docker container as follows:
 Then, you can access the environment as follows:
 
 ```
-$ sudo docker run --gpus all --rm -it \
+$ sudo docker run --rm  -it \
        --name ml_adversary_container \
        -v "$(pwd)"/output,target=/home/ml_adversary/output \
        -v "$(pwd)"/saved_models,target=/home/ml_adversary/saved_models \
        ml_adversary bash
 ```
-
-Finally, run...
-
-`$ python main.py`
 
 ## Project Resources
 
