@@ -178,38 +178,95 @@ class Model:
         )
         return image, label
 
-    def linf_projected_gradient_descent_attack(self, data: tf.data.Dataset) -> AttackHistory:
+    def linf_projected_gradient_descent_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float]) -> AttackHistory:
         """
         Performs a Linf Projected Gradient Descent Attack.
 
-        :param data: The data to use to attack the model.
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
         :return: The attack history.
         """
-        # epsilons
-        epsilons = [
-            0.0,
-            0.0002,
-            0.0005,
-            0.0008,
-            0.001,
-            0.0015,
-            0.002,
-            0.003,
-            0.01,
-            0.1,
-            0.3,
-            0.5,
-            1.0,
-        ]
-
-        # define the foolbox model and attack - make sure this is trained...
-        foolbox_model = fb.TensorFlowModel(self.model, bounds=(0, 255))
-     
         # define the attack
         attack = fb.attacks.LinfPGD()
-        image, label = self._random_batch_from_tf_dataset(data)
         raw_advs, clipped_advs, success = attack(
-            foolbox_model, image, label, epsilons=epsilons
+            foolbox_model, images, labels, epsilons=epsilons
         )
-        
-        return AttackHistory(raw_advs, clipped_advs, success, epsilons, foolbox_model, image, label)
+
+        return AttackHistory("Linf Projected Gradient Descent Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+
+    def fast_gradient_descent_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float]) -> AttackHistory:
+        """
+        Performs a Fast Gradient Method (FGM) Attack.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # define the attack
+        attack = fb.attacks.FGM()
+        raw_advs, clipped_advs, success = attack(
+            foolbox_model, images, labels, epsilons=epsilons
+        )
+
+        return AttackHistory("Fast Gradient Method (FGM) Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+
+    def deepfool_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float]) -> AttackHistory:
+        """
+        Performs a DeepFool Attack.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # define the attack
+        attack = fb.attacks.DeepFoolAttack()
+        raw_advs, clipped_advs, success = attack(
+            foolbox_model, images, labels, epsilons=epsilons
+        )
+
+        return AttackHistory("DeepFool Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+
+    def linf_addative_noise_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float])-> AttackHistory:
+        """
+        Performs a Linf Addative Noise Attack.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # define the attack
+        attack = fb.attacks.LinfAdditiveUniformNoiseAttack()
+        raw_advs, clipped_advs, success = attack(
+            foolbox_model, images, labels, epsilons=epsilons
+        )
+
+        return AttackHistory("Linf Addative Noise Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+
+    def preform_attacks(self, data: tf.data.Dataset, epsilons: list[float]) -> list[AttackHistory]:
+        """
+        Performs all attacks on the model.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # create a foolbox model
+        model = fb.TensorFlowModel(self.model, bounds=(0, 255))
+        # get a random batch from the data
+        image, label = self._random_batch_from_tf_dataset(data)
+        # preform the attacks
+        linf_pgd_attack_history = self.linf_projected_gradient_descent_attack(model, image, label, epsilons)
+        deepfool_attack_history = self.deepfool_attack(model, image, label, epsilons)
+        fgm_attack_history = self.fast_gradient_descent_attack(model, image, label, epsilons)
+        linf_addative_noise_attack_history = self.linf_addative_noise_attack(model, image, label, epsilons)
+        return [linf_pgd_attack_history, deepfool_attack_history, fgm_attack_history, linf_addative_noise_attack_history]

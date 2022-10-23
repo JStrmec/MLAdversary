@@ -18,7 +18,7 @@ class AttackHistory:
     misclassified and within the epsilon balls around the clean
     samples.
     """
-
+    attack_type:str
     raw_adversarial_examples: tf.data.Dataset
     clipped_adversarial_examples: tf.data.Dataset
     is_adversarial: tf.data.Dataset
@@ -29,6 +29,7 @@ class AttackHistory:
 
     def __init__(
         self,
+        attack_type: str,
         raw_adversarial_examples: tf.data.Dataset,
         clipped_adversarial_examples: tf.data.Dataset,
         is_adversarial: tf.data.Dataset,
@@ -40,6 +41,7 @@ class AttackHistory:
         """
         Initializes a new instance of the AttackHistory class.
 
+        :param attack_type: The type of attack.
         :param raw_adversarial_examples: The raw adversarial examples.
         :param clipped_adversarial_examples: The clipped adversarial examples.
         :param is_adversarial: The boolean indicating whether the sample is an adversarial example.
@@ -48,6 +50,7 @@ class AttackHistory:
         :param attack_data: The data used in the attack.
         :param attack_labels: The labels used in the attack.
         """
+        self.attack_type = attack_type
         self.raw_adversarial_examples = raw_adversarial_examples
         self.clipped_adversarial_examples = clipped_adversarial_examples
         self.is_adversarial = is_adversarial
@@ -74,8 +77,9 @@ class AttackHistory:
         robust_accuracy = self.get_robust_accuracy()
         for eps, acc in zip(self.epsilons, robust_accuracy):
             print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
-        plt.title("Perturbation vs Accuracy of the Model")
+        plt.title("Perturbation for {} vs Accuracy of the Model".format(self.attack_type))
         plt.set_xlabel("epsilon")
         plt.set_ylabel("accruacy")
         plt.plot(self.epsilons, robust_accuracy.numpy())
-        plt.savefig("output/eplisons_v_robust_acc.png")
+        plt.savefig("output/eplisons_v_robust_acc_{}.png".format(self.attack_type))
+

@@ -23,12 +23,24 @@ model = Model(project_config)
 history = model.fit_model(project_data.train, project_data.validation, "saved_models/model")
 #history = None
 
-# this is just testing to make sure we can get foolbox to work, lets provide some
-# analysis about the attack's effectiveness - examples in the book
-attack_history = model.linf_projected_gradient_descent_attack(project_data.train)
+
+# epsilons
+epsilons = [0.0,0.0002,0.0005,0.0008,0.001,0.0015,0.002,0.003,0.01,0.1,0.3,0.5,1.0]
+
+# preforms 4 attacks on the model and returns the history of each attack in a list as 
+# [LPDG, DF, FGM, LAN]
+attack_history = model.preform_attacks(project_data.train, epsilons)
 
 # Attack Analysis
-attack_history.analysis()
+for attack in attack_history:
+    attack.analysis()
+    # Plot single comparison of adversarial anaylsis
+    plt.plot(attack.epsilons, attack.get_robust_accuracy(), "*-", label = attack.attack_type)
+plt.legend(loc="upper left")
+plt.set_xlabel("epsilon")
+plt.set_ylabel("accruacy")
+plt.savefig("output/preturbation_comparion.png")
+plt.clf()
 
 if not history:
     sys.exit(1)
