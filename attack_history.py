@@ -66,7 +66,7 @@ class AttackHistory:
         """
         return 1 - self.is_adversarial.float32().mean(axis=-1)
 
-    def print(self) -> None:
+    def analysis(self) -> None:
         """
         Prints the history of the attack.
         """

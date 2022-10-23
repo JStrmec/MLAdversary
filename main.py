@@ -28,8 +28,7 @@ history = model.fit_model(project_data.train, project_data.validation, "saved_mo
 attack_history = model.linf_projected_gradient_descent_attack(project_data.train)
 
 # Attack Analysis
-# print attack history
-attack_history.print()
+attack_history.analysis()
 
 if not history:
     sys.exit(1)
