@@ -6,7 +6,6 @@ the attack history class.
 """
 from dataclasses import dataclass
 import tensorflow as tf
-from foolbox import accuracy
 import matplotlib.pyplot as plt
 
 @dataclass
