@@ -24,7 +24,7 @@ history = model.fit_model(project_data.train, project_data.validation, "saved_mo
 #history = None
 
 
-# epsilons
+# epsilons for attacks
 epsilons = [0.0,0.0002,0.0005,0.0008,0.001,0.0015,0.002,0.003,0.01,0.1,0.3,0.5,1.0]
 
 # preforms 4 attacks on the model and returns the history of each attack in a list as 
@@ -37,8 +37,9 @@ for attack in attack_history:
     # Plot single comparison of adversarial anaylsis
     plt.plot(attack.epsilons, attack.get_robust_accuracy(), "*-", label = attack.attack_type)
 plt.legend(loc="upper left")
-plt.set_xlabel("epsilon")
-plt.set_ylabel("accruacy")
+plt.title("Perturbation for all attacks vs Accuracy of the Model")
+plt.xlabel("epsilon")
+plt.ylabel("accruacy")
 plt.savefig("output/preturbation_comparion.png")
 plt.clf()
 

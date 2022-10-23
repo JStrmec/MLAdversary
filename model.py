@@ -216,7 +216,7 @@ class Model:
 
     def deepfool_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float]) -> AttackHistory:
         """
-        Performs a DeepFool Attack.
+        Performs a Linf Deep Fool Attack.
 
         :param model: The model to attack.
         :param images: The images to attack.
@@ -225,12 +225,12 @@ class Model:
         :return: The attack history.
         """
         # define the attack
-        attack = fb.attacks.DeepFoolAttack()
+        attack = fb.attacks.LinfDeepFoolAttack()
         raw_advs, clipped_advs, success = attack(
             foolbox_model, images, labels, epsilons=epsilons
         )
 
-        return AttackHistory("DeepFool Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+        return AttackHistory("Linf Deep Fool Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
 
     def linf_addative_noise_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float])-> AttackHistory:
         """
