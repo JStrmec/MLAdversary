@@ -182,10 +182,8 @@ class Model:
         """
         Performs a Linf Projected Gradient Descent Attack.
 
-        :param data: The data to use to attack the model. 
-
-        TODO - update return parameter and type with actual type and information
-               on things that are being returned.
+        :param data: The data to use to attack the model.
+        :return: The attack history.
         """
         # epsilons
         epsilons = [
@@ -213,6 +211,5 @@ class Model:
         raw_advs, clipped_advs, success = attack(
             foolbox_model, image, label, epsilons=epsilons
         )
-
-        # TODO - provide analysis, perhaps in main...
+        
         return AttackHistory(raw_advs, clipped_advs, success, epsilons, foolbox_model, image, label)
