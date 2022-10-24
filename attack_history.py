@@ -77,7 +77,7 @@ class AttackHistory:
         robust_accuracy = self.get_robust_accuracy()
         for eps, acc in zip(self.epsilons, robust_accuracy):
             print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
-        plt.title("Perturbation for {} vs Accuracy of the Model".format(self.attack_type))
+        plt.title("Perturbation of {} vs Accuracy of the Model".format(self.attack_type))
         plt.xlabel("epsilon")
         plt.ylabel("accruacy")
         plt.plot(self.epsilons, robust_accuracy.numpy())

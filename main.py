@@ -35,7 +35,7 @@ attack_history = model.preform_attacks(project_data.train, epsilons)
 for attack in attack_history:
     attack.analysis()
     # Plot single comparison of adversarial anaylsis
-    plt.plot(attack.epsilons, attack.get_robust_accuracy(), "*-", label = attack.attack_type)
+    plt.plot(attack.epsilons, (attack.get_robust_accuracy()).numpy(), label = attack.attack_type)
 plt.legend(loc="upper left")
 plt.title("Perturbation for all attacks vs Accuracy of the Model")
 plt.xlabel("epsilon")

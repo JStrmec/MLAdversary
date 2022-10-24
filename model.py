@@ -194,7 +194,7 @@ class Model:
             foolbox_model, images, labels, epsilons=epsilons
         )
 
-        return AttackHistory("Linf Projected Gradient Descent Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+        return AttackHistory("LPGD Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
 
     def fast_gradient_descent_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float]) -> AttackHistory:
         """
@@ -212,7 +212,7 @@ class Model:
             foolbox_model, images, labels, epsilons=epsilons
         )
 
-        return AttackHistory("Fast Gradient Method (FGM) Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+        return AttackHistory("FGM Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
 
     def deepfool_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float]) -> AttackHistory:
         """
@@ -230,7 +230,7 @@ class Model:
             foolbox_model, images, labels, epsilons=epsilons
         )
 
-        return AttackHistory("Linf Deep Fool Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+        return AttackHistory("LDF Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
 
     def linf_addative_noise_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float])-> AttackHistory:
         """
@@ -248,7 +248,7 @@ class Model:
             foolbox_model, images, labels, epsilons=epsilons
         )
 
-        return AttackHistory("Linf Addative Noise Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+        return AttackHistory("LAN Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
 
     def preform_attacks(self, data: tf.data.Dataset, epsilons: list[float]) -> list[AttackHistory]:
         """
