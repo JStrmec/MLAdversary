@@ -82,4 +82,5 @@ class AttackHistory:
         plt.ylabel("accruacy")
         plt.plot(self.epsilons, robust_accuracy.numpy())
         plt.savefig("output/eplisons_v_robust_acc_{}.png".format(self.attack_type))
+        plt.clf()
 

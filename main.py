@@ -25,7 +25,7 @@ history = model.fit_model(project_data.train, project_data.validation, "saved_mo
 
 
 # epsilons for attacks
-epsilons = [0.0,0.0002,0.0005,0.0008,0.001,0.0015,0.002,0.003,0.01,0.1,0.3,0.5,1.0]
+epsilons = [0.0,0.00025,0.0005,0.0008,0.001,0.0015,0.0025,0.005,0.01,0.05,0.1,0.3,0.5,0.8,1.0]
 
 # preforms 4 attacks on the model and returns the history of each attack in a list as 
 # [LPDG, DF, FGM, LAN]
@@ -40,7 +40,7 @@ plt.legend(loc="upper left")
 plt.title("Perturbation for all attacks vs Accuracy of the Model")
 plt.xlabel("epsilon")
 plt.ylabel("accruacy")
-plt.savefig("output/preturbation_comparion.png")
+plt.savefig("output/preturbation_comparsion.png")
 plt.clf()
 
 if not history:
