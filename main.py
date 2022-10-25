@@ -34,10 +34,14 @@ attack_history = model.preform_attacks(project_data.train, epsilons)
 # Attack Analysis
 for attack in attack_history:
     attack.analysis()
-    # Plot single comparison of adversarial anaylsis
-    plt.plot(attack.epsilons, (attack.get_robust_accuracy()).numpy(), label = attack.attack_type)
-plt.legend(loc="upper left")
-plt.title("Perturbation for all attacks vs Accuracy of the Model")
+# Plot single comparison of adversarial anaylsis 
+plt.plot(attack_history[0].epsilons, (attack_history[0].get_robust_accuracy()).numpy(), label = attack_history[0].attack_type)
+plt.plot(attack_history[1].epsilons, (attack_history[1].get_robust_accuracy()).numpy(), label = attack_history[1].attack_type)
+plt.plot(attack_history[2].epsilons, (attack_history[2].get_robust_accuracy()).numpy(), label = attack_history[2].attack_type)
+plt.plot(attack_history[3].epsilons, (attack_history[3].get_robust_accuracy()).numpy(), label = attack_history[3].attack_type)
+plt.plot(attack_history[4].epsilons, (attack_history[4].get_robust_accuracy()).numpy(), label = attack_history[4].attack_type)
+plt.title("Perturbation of Attacks vs Accuracy of the Model")
+plt.legend(loc="upper right")
 plt.xlabel("epsilon")
 plt.ylabel("accruacy")
 plt.savefig("output/preturbation_comparsion.png")

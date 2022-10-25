@@ -232,9 +232,9 @@ class Model:
 
         return AttackHistory("LDF Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
 
-    def linf_addative_noise_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float])-> AttackHistory:
+    def linf__iterative_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float])-> AttackHistory:
         """
-        Performs a Linf Addative Noise Attack.
+        Performs a Linf Basic Iterative Attack.
 
         :param model: The model to attack.
         :param images: The images to attack.
@@ -243,12 +243,30 @@ class Model:
         :return: The attack history.
         """
         # define the attack
-        attack = fb.attacks.LinfAdditiveUniformNoiseAttack()
+        attack = fb.attacks.LinfBasicIterativeAttack()
         raw_advs, clipped_advs, success = attack(
             foolbox_model, images, labels, epsilons=epsilons
         )
 
-        return AttackHistory("LAN Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+        return AttackHistory("LBI Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+
+    def inversion_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float])-> AttackHistory:
+        """
+        Performs a Inversion Attack.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # define the attack
+        attack = fb.attacks.InversionAttack(distance=fb.distances.LpDistance(p=2))
+        raw_advs, clipped_advs, success = attack(
+            foolbox_model, images, labels, epsilons=epsilons
+        )
+
+        return AttackHistory("Inversion Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
 
     def preform_attacks(self, data: tf.data.Dataset, epsilons: list[float]) -> list[AttackHistory]:
         """
@@ -268,5 +286,7 @@ class Model:
         linf_pgd_attack_history = self.linf_projected_gradient_descent_attack(model, image, label, epsilons)
         deepfool_attack_history = self.deepfool_attack(model, image, label, epsilons)
         fgm_attack_history = self.fast_gradient_descent_attack(model, image, label, epsilons)
-        linf_addative_noise_attack_history = self.linf_addative_noise_attack(model, image, label, epsilons)
-        return [linf_pgd_attack_history, deepfool_attack_history, fgm_attack_history, linf_addative_noise_attack_history]
+        lbi_attack_history = self.linf__iterative_attack(model, image, label, epsilons)
+        inversion_attack_history = self.inversion_attack(model, image, label, epsilons)
+        
+        return [linf_pgd_attack_history, deepfool_attack_history, fgm_attack_history, lbi_attack_history, inversion_attack_history]
