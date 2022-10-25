@@ -1,3 +1,17 @@
-/venv/
-/data/
-/saved_models/
+# GITIGNORE - WHITELIST STYLE
+
+# ignore everything by default
+!.gitignore
+*
+
+!config_loader.py
+!.dockerignore.py
+!attack_history.py
+!data_loader.py
+!Dockerfile
+!env_setup.py
+!main.py
+!model.py
+!model.toml
+!README.md
+!requirements.txt

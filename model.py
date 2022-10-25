@@ -5,11 +5,13 @@ This is where the actual task of binary classification
 happens.
 """
 import os
-from typing import Any, Optional
-
-import tensorflow as tf
-
+import random
+from typing import Any, Optional, Tuple
+from attack_history import AttackHistory
 from config_loader import Config
+import tensorflow as tf
+import foolbox as fb
+import eagerpy as ep
 
 
 class ConvolutionalBlock(tf.keras.Model):
@@ -18,7 +20,13 @@ class ConvolutionalBlock(tf.keras.Model):
     neural network that we are building.
     """
 
-    def __init__(self, num_filters: int, kernel_size: int, pool_size: int, activation: tf.keras.activations) -> None:
+    def __init__(
+        self,
+        num_filters: int,
+        kernel_size: int,
+        pool_size: int,
+        activation: tf.keras.activations,
+    ) -> None:
         """
         Initializes a new instance of the ConvolutionalBlock.
 
@@ -28,7 +36,9 @@ class ConvolutionalBlock(tf.keras.Model):
         :param activation: The activation function to use.
         """
         super(ConvolutionalBlock, self).__init__()
-        self.conv_2d = tf.keras.layers.Conv2D(filters=num_filters, kernel_size=kernel_size)
+        self.conv_2d = tf.keras.layers.Conv2D(
+            filters=num_filters, kernel_size=kernel_size
+        )
         self.max_pool_2d = tf.keras.layers.MaxPool2D(pool_size=pool_size)
         self.batch_normalization = tf.keras.layers.BatchNormalization()
         self.activation = activation
@@ -62,9 +72,15 @@ class Model:
         :param model_path: The absolute path to a saved model.
         """
         self.config = config
-        self.model = tf.keras.Sequential([
+        self.model = tf.keras.Sequential(
+            [
                 tf.keras.layers.Input(
-                    (self.config.dataset_config.image_width, self.config.dataset_config.image_height, 3)),
+                    (
+                        self.config.dataset_config.image_width,
+                        self.config.dataset_config.image_height,
+                        3,
+                    )
+                ),
                 ConvolutionalBlock(32, 3, 2, tf.keras.activations.relu),
                 ConvolutionalBlock(32, 3, 2, tf.keras.activations.relu),
                 ConvolutionalBlock(64, 3, 2, tf.keras.activations.relu),
@@ -72,18 +88,26 @@ class Model:
                 tf.keras.layers.GlobalAveragePooling2D(),
                 tf.keras.layers.Dense(units=1024, activation=tf.keras.activations.relu),
                 tf.keras.layers.Dropout(0.3),
-                tf.keras.layers.Dense(units=1, activation=tf.keras.activations.sigmoid)]
-            )
+                tf.keras.layers.Dense(units=2, activation=tf.keras.activations.softmax),
+            ]
+        )
         self.model.compile(
-            loss="binary_crossentropy",
-            optimizer=tf.keras.optimizers.Adam(learning_rate=config.model_config.learning_rate),
+            loss="sparse_categorical_crossentropy",
+            optimizer=tf.keras.optimizers.Adam(
+                learning_rate=config.model_config.learning_rate
+            ),
             metrics=["accuracy"],
         )
 
         if model_path:
             self._load_model(model_path)
 
-    def fit_model(self, training_data: tf.data.Dataset, validation_data: tf.data.Dataset, save_directory: Optional[os.PathLike] = None) -> tf.keras.callbacks.History:
+    def fit_model(
+        self,
+        training_data: tf.data.Dataset,
+        validation_data: tf.data.Dataset,
+        save_directory: Optional[os.PathLike] = None,
+    ) -> tf.keras.callbacks.History:
         """
         Fits the model on training data. We are using an early stopping callback
         to stop training if necessary.
@@ -108,7 +132,7 @@ class Model:
             epochs=self.config.model_config.num_epochs,
             callbacks=callbacks,
             batch_size=self.config.model_config.batch_size,
-            validation_batch_size=self.config.model_config.batch_size
+            validation_batch_size=self.config.model_config.batch_size,
         )
         return history
 
@@ -118,6 +142,7 @@ class Model:
 
         :param data: The data to make predictions on.
         """
+
         return self.model.predict(data)
 
     def _load_model(self, path: os.PathLike) -> None:
@@ -130,3 +155,138 @@ class Model:
             return
 
         self.model.load_weights(path)
+
+    @staticmethod
+    def _random_batch_from_tf_dataset(
+        data: tf.data.Dataset, seed: int = 0
+    ) -> Tuple[ep.types.NativeTensor, ep.types.NativeTensor]:
+        """
+        Takes a random batch from a tf_dataset.
+
+        :param data: The Tensorflow dataset that is being used.
+        :param seed: The random seed.
+
+        :return: A tuple containing a batch of images and labels.
+        """
+        random.seed(seed)
+        index = random.randint(0, len(data) - 1)
+        data = data.skip(index)
+        image, label = next(data.as_numpy_iterator())
+        image = ep.astensor(tf.convert_to_tensor(image))
+        label = ep.astensor(
+            tf.reshape(tf.convert_to_tensor(label, dtype=tf.int64), [-1])
+        )
+        return image, label
+
+    def linf_projected_gradient_descent_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float]) -> AttackHistory:
+        """
+        Performs a Linf Projected Gradient Descent Attack.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # define the attack
+        attack = fb.attacks.LinfPGD()
+        raw_advs, clipped_advs, success = attack(
+            foolbox_model, images, labels, epsilons=epsilons
+        )
+
+        return AttackHistory("LPGD Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+
+    def fast_gradient_descent_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float]) -> AttackHistory:
+        """
+        Performs a Fast Gradient Method (FGM) Attack.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # define the attack
+        attack = fb.attacks.FGM()
+        raw_advs, clipped_advs, success = attack(
+            foolbox_model, images, labels, epsilons=epsilons
+        )
+
+        return AttackHistory("FGM Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+
+    def deepfool_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float]) -> AttackHistory:
+        """
+        Performs a Linf Deep Fool Attack.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # define the attack
+        attack = fb.attacks.LinfDeepFoolAttack()
+        raw_advs, clipped_advs, success = attack(
+            foolbox_model, images, labels, epsilons=epsilons
+        )
+
+        return AttackHistory("LDF Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+
+    def linf__iterative_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float])-> AttackHistory:
+        """
+        Performs a Linf Basic Iterative Attack.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # define the attack
+        attack = fb.attacks.LinfBasicIterativeAttack()
+        raw_advs, clipped_advs, success = attack(
+            foolbox_model, images, labels, epsilons=epsilons
+        )
+
+        return AttackHistory("LBI Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+
+    def inversion_attack(self, foolbox_model: fb.TensorFlowModel, images: ep.types.NativeTensor, labels: ep.types.NativeTensor, epsilons: list[float])-> AttackHistory:
+        """
+        Performs a Inversion Attack.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # define the attack
+        attack = fb.attacks.InversionAttack(distance=fb.distances.LpDistance(p=2))
+        raw_advs, clipped_advs, success = attack(
+            foolbox_model, images, labels, epsilons=epsilons
+        )
+
+        return AttackHistory("Inversion Attack",raw_advs, clipped_advs, success, epsilons, foolbox_model, images, labels)
+
+    def preform_attacks(self, data: tf.data.Dataset, epsilons: list[float]) -> list[AttackHistory]:
+        """
+        Performs all attacks on the model.
+
+        :param model: The model to attack.
+        :param images: The images to attack.
+        :param labels: The labels of the images.
+        :param epsilons: The epsilons to use.
+        :return: The attack history.
+        """
+        # create a foolbox model
+        model = fb.TensorFlowModel(self.model, bounds=(0, 255))
+        # get a random batch from the data
+        image, label = self._random_batch_from_tf_dataset(data)
+        # preform the attacks
+        linf_pgd_attack_history = self.linf_projected_gradient_descent_attack(model, image, label, epsilons)
+        deepfool_attack_history = self.deepfool_attack(model, image, label, epsilons)
+        fgm_attack_history = self.fast_gradient_descent_attack(model, image, label, epsilons)
+        lbi_attack_history = self.linf__iterative_attack(model, image, label, epsilons)
+        inversion_attack_history = self.inversion_attack(model, image, label, epsilons)
+        
+        return [linf_pgd_attack_history, deepfool_attack_history, fgm_attack_history, lbi_attack_history, inversion_attack_history]
