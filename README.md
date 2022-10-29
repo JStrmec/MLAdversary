@@ -20,26 +20,18 @@ Team Members: Abrhiram Bondada, Oscasavia Birugi, Noah Howell, Nathan Waltz (Dev
 
 ## Startup Instructions
 
-In order to run this repository, you will want to first install some version of Python 3 (it doesn't matter since you will be running this in a Docker container anyways, just used for the startup script) and Docker, then follow the instructions to install Tensorflow's Docker container [here](https://www.tensorflow.org/install/docker). This is by far the easiest way to get Tensorflow all set up, and some convenience scripts were written to streamline this setup process for you. 
 
-Then, you will want to run the environment setup script!
+The most straightforward way to run the code in this repository is to install Docker and Visual Studio Code. After doing so, follow these steps:
 
-`$ python env_setup.py`
-`$ curl https://nathanwaltz.xyz/dataset/data.zip --output data.zip`
-`$ unzip data.zip -d .`
+1. Install the `Remote Development` extension made by Microsoft.
 
-Afterwards, you will want to build the Docker container as follows:
+1. Open the folder containing the entirety of the repository in Visual Studio Code. 
 
-`$ sudo docker build -t ml_adversary .`
+1. Do `Ctrl+Shift+P`.
 
-Then, you can access the environment as follows:
+1. Select `Remote-Containers: Open Folder in Container`. 
 
-```
-$ sudo docker run --rm -it \
-       --name ml_adversary_container \
-       -v $(pwd):target=/home/ml_adversary
-       ml_adversary bash
-```
+After everything sets up, you should be able to get to work. To access the terminal to run `main.py`, you can do "Ctrl+Shift+\`". Then run `python main.py`!
 
 ## Project Resources
 
