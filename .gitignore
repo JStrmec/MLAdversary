@@ -1,17 +1,19 @@
-# GITIGNORE - WHITELIST STYLE
-
-# ignore everything by default
-!.gitignore
+# Ignore everything by default
 *
+!*/
 
+# include directories
+!.devcontainer/
+!.devcontainer/**
+
+# include files
+!.gitignore
 !config_loader.py
-!.dockerignore.py
-!attack_history.py
 !data_loader.py
+!.dockerignore
 !Dockerfile
-!env_setup.py
 !main.py
 !model.py
 !model.toml
-!README.md
+!README.model
 !requirements.txt
