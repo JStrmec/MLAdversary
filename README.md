@@ -33,6 +33,15 @@ The most straightforward way to run the code in this repository is to install Do
 
 After everything sets up, you should be able to get to work. To access the terminal to run `main.py`, you can do "Ctrl+Shift+\`". Then run `python main.py`!
 
+There are a few command line arguments to be aware of...
+
+| Argument Name | Flag           | Args        | Description                                         |
+| ------------- | -------------- | ----------- | --------------------------------------------------- |
+| gpus          | --gpus         | None        | Whether to enable GPU accelerated machine learning. |
+| load_model    | --load_model   | os.PathLike | Loads a pretrained model from a path.               |
+| model_output  | --model_output | os.PathLike | Outputs a model to a given path.                    |
+
+
 ## Project Resources
 
 - https://github.com/bethgelab/foolbox
