@@ -23,9 +23,9 @@ project_data = project_data_loader.load_data(random_noise_transformation)
 # create and train the model
 model = Model(project_config, "saved_model/model")
 
-# history = model.fit_model(
-#     project_data.train, project_data.validation, "saved_models/model"
-# )
+history = model.fit_model(
+     project_data.train, project_data.validation, "saved_models/model"
+ )
 
 # epsilons for attacks
 epsilons = [
@@ -72,7 +72,7 @@ for attack in attack_history:
     )
 
 plt.title("Perturbation of Attacks vs Accuracy of the Model")
-plt.legend(loc="upper right")
+plt.legend(loc="lower left")
 plt.xlabel("epsilon")
 plt.ylabel("accuracy")
 plt.savefig("output/preturbation_comparsion.png")
