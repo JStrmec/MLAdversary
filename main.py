@@ -140,7 +140,6 @@ def perform_attacks(
         ],
     )
 
-
 def analyze_attack_history(attack_history: List[AttackHistory]) -> None:
     """
     Perform analysis of attack history.
