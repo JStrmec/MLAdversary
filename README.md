@@ -16,7 +16,7 @@ Team Members: Abrhiram Bondada, Oscasavia Birugi, Noah Howell, Nathan Waltz (Dev
 
 - [X] 2. Using Foolbox, create random noise and adversarial data to reduce accuracy of the CNN.
 
-- [ ] 3. Train on adversarial data to increase accuracy of the CNN model.
+- [X] 3. Make model more robust.
 
 ## Startup Instructions
 
