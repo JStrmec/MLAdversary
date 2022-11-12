@@ -5,6 +5,10 @@
 # include directories
 !.devcontainer/
 !.devcontainer/**
+!output/
+!output/**
+!saved_model/
+!saved_model/**
 
 # include files
 !.gitignore

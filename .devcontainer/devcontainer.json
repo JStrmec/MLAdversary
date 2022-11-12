@@ -7,9 +7,14 @@
 		"context": "..",
 		"args": {
 			// if you have a GPU - use latest-gpu
-			"VARIANT": "latest"
+			"VARIANT": "latest-gpu"
 		}
 	},
+	
+	"runArgs": [
+		"--gpus",
+		"all"
+	],
 	
 	// Configure tool-specific properties.
 	"customizations": {

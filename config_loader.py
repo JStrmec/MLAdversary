@@ -21,6 +21,7 @@ class DatasetConfig:
 
     image_width: int
     image_height: int
+    num_channels: int
     seed: int
     validation_split: float
     test_split: float
@@ -41,6 +42,7 @@ class ModelConfig:
 
     batch_size: int
     seed: int
+    ensemble_size: int
     learning_rate: float
     num_epochs: int
 

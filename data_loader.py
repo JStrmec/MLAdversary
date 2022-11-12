@@ -9,7 +9,6 @@ from typing import Optional
 
 import tensorflow as tf
 from dataclasses import dataclass
-import numpy as np
 
 from config_loader import Config
 
@@ -69,38 +68,42 @@ class DataLoader:
         :return: ModelData - A de-facto struct containing
                  various data that can be consumed by the Keras later.
         """
-        training_image_dataset: tf.data.Dataset = tf.keras.preprocessing.image_dataset_from_directory(
-            self.directory,
-            labels="inferred",
-            label_mode="binary",
-            color_mode="rgb",
-            batch_size=self.config.model_config.batch_size,
-            image_size=(
-                self.config.dataset_config.image_width,
-                self.config.dataset_config.image_height,
-            ),
-            shuffle=True,
-            seed=self.config.dataset_config.seed,
-            validation_split=self.config.dataset_config.validation_split,
-            subset="training",
-            interpolation="bilinear",
+        training_image_dataset: tf.data.Dataset = (
+            tf.keras.preprocessing.image_dataset_from_directory(
+                self.directory,
+                labels="inferred",
+                label_mode="binary",
+                color_mode="rgb",
+                batch_size=self.config.model_config.batch_size,
+                image_size=(
+                    self.config.dataset_config.image_width,
+                    self.config.dataset_config.image_height,
+                ),
+                shuffle=True,
+                seed=self.config.dataset_config.seed,
+                validation_split=self.config.dataset_config.validation_split,
+                subset="training",
+                interpolation="bilinear",
+            )
         )
 
-        validation_image_dataset: tf.data.Dataset = tf.keras.preprocessing.image_dataset_from_directory(
-            self.directory,
-            labels="inferred",
-            label_mode="binary",
-            color_mode="rgb",
-            batch_size=self.config.model_config.batch_size,
-            image_size=(
-                self.config.dataset_config.image_width,
-                self.config.dataset_config.image_height,
-            ),
-            shuffle=True,
-            seed=self.config.dataset_config.seed,
-            validation_split=self.config.dataset_config.validation_split,
-            subset="validation",
-            interpolation="bilinear",
+        validation_image_dataset: tf.data.Dataset = (
+            tf.keras.preprocessing.image_dataset_from_directory(
+                self.directory,
+                labels="inferred",
+                label_mode="binary",
+                color_mode="rgb",
+                batch_size=self.config.model_config.batch_size,
+                image_size=(
+                    self.config.dataset_config.image_width,
+                    self.config.dataset_config.image_height,
+                ),
+                shuffle=True,
+                seed=self.config.dataset_config.seed,
+                validation_split=self.config.dataset_config.validation_split,
+                subset="validation",
+                interpolation="bilinear",
+            )
         )
 
         # perform transformation on training data
@@ -116,6 +119,16 @@ class DataLoader:
             validation_image_dataset,
             validation_image_dataset.class_names,
         )
+
+
+def random_noise_transformation(input_data: tf.Tensor) -> tf.Tensor:
+    """
+    Adds random noise to a given input image.
+
+    :param input_data: The input data to add noise to.
+    :return: A new tensor with added input noise.
+    """
+    return input_data + tf.random.uniform(tf.shape(input_data), seed=42)
 
 
 def image_is_corrupt(image_path: os.PathLike):

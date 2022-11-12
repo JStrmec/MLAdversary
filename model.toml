@@ -5,6 +5,7 @@ title = "Model Hyperparameters"
 seed = 42
 image_width = 256
 image_height = 256
+num_channels = 3
 validation_split = 0.2
 test_split = 0.5
 
@@ -13,4 +14,5 @@ test_split = 0.5
 seed = 42
 batch_size = 20
 learning_rate = 0.01
-num_epochs = 18
+num_epochs = 25
+ensemble_size = 3
