@@ -6,7 +6,7 @@ specifications in model.toml.
 """
 
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, List
 
 import tomli
 
@@ -28,6 +28,22 @@ class DatasetConfig:
 
     def __init__(self, config_data: Dict[str, any]) -> None:
         dataset_config_data = config_data["dataset"]
+        for key, value in dataset_config_data.items():
+            setattr(self, key, value)
+
+
+@dataclass
+class AttackConfig:
+    """
+    Various configuration information related to the attacks.
+    Be sure to add attributes to this class as you add attributes
+    to model.toml.
+    """
+
+    epsilons: List[float]
+
+    def __init__(self, config_data: Dict[str, any]) -> None:
+        dataset_config_data = config_data["attack"]
         for key, value in dataset_config_data.items():
             setattr(self, key, value)
 
@@ -60,6 +76,7 @@ class Config:
 
     dataset_config: DatasetConfig
     model_config: ModelConfig
+    attack_config: AttackConfig
 
 
 class ConfigLoader:
@@ -77,7 +94,11 @@ class ConfigLoader:
         self._config_path = config_path
         with open(config_path, "rb") as config_handle:
             self._raw_config_data = tomli.load(config_handle)
-        self.config = Config(self._read_dataset_config(), self._read_model_config())
+        self.config = Config(
+            self._read_dataset_config(),
+            self._read_model_config(),
+            self._read_attack_config(),
+        )
 
     def get_config(self) -> Config:
         """
@@ -102,3 +123,11 @@ class ConfigLoader:
         :return: The dataset configuration data.
         """
         return DatasetConfig(self._raw_config_data)
+
+    def _read_attack_config(self) -> AttackConfig:
+        """
+        Read the dataset configuration into memory.
+
+        :return: The dataset configuration data.
+        """
+        return AttackConfig(self._raw_config_data)
