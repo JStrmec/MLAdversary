@@ -44,5 +44,5 @@ RUN curl https://nathanwaltz.xyz/dataset/data.zip --output data.zip
 RUN unzip data.zip -d .
 
 # create the relevant directories
-RUN mkdir -p /home/ml_adversary/output
-RUN mkdir -p /home/ml_adversary/saved_models
+RUN mkdir -p /workspaces/MLAdversary/output
+RUN mkdir -p /workspaces/MLAdversary/saved_models
