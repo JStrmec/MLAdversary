@@ -6,9 +6,9 @@ rest of the application.
 """
 import os
 from typing import Optional
+from dataclasses import dataclass
 
 import tensorflow as tf
-from dataclasses import dataclass
 
 from config_loader import Config
 
@@ -110,9 +110,6 @@ class DataLoader:
         if transformation is not None:
             training_image_dataset.map(lambda x, y: (transformation(x), y))
 
-        # prefetch some images
-        # training_image_dataset = training_image_dataset.prefetch(self.config.model_config.batch_size)
-        # validation_image_dataset = validation_image_dataset.prefetch(self.config.model_config.batch_size)
         return ModelData(
             training_image_dataset,
             training_image_dataset.class_names,

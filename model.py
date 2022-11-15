@@ -7,11 +7,13 @@ happens.
 import os
 import random
 from typing import Any, Optional, Tuple, List, Callable, Iterable
-from attack_history import AttackHistory
-from config_loader import Config
+
 import tensorflow as tf
 import foolbox as fb
 import eagerpy as ep
+
+from attack_history import AttackHistory
+from config_loader import Config
 
 
 class ConvolutionalBlock(tf.keras.Model):
@@ -120,6 +122,10 @@ class ConvolutionalModel(tf.keras.Model):
 
 
 class Model:
+    """
+    Model class.
+    """
+
     def __init__(self, config: Config, model_path: Optional[os.PathLike] = None):
         """
         Initializes a new instance of the model class.
@@ -128,20 +134,7 @@ class Model:
         :param model_path: The absolute path to a saved model.
         """
         self.config = config
-        models = [
-            ConvolutionalModel(32, 2, 1024, 0.3)
-            for _ in range(config.model_config.ensemble_size)
-        ]
-        model_input = tf.keras.layers.Input(
-            shape=(
-                self.config.dataset_config.image_width,
-                self.config.dataset_config.image_height,
-                self.config.dataset_config.num_channels,
-            )
-        )
-        model_outputs = [model(model_input) for model in models]
-        output = tf.keras.layers.Average()(model_outputs)
-        self.model = tf.keras.Model(inputs=model_input, outputs=output)
+        self.model = ConvolutionalModel(32, 2, 1024, 0.3)
         self.model.compile(
             loss="sparse_categorical_crossentropy",
             optimizer=tf.keras.optimizers.Adam(
@@ -156,7 +149,7 @@ class Model:
         self,
         training_data: tf.data.Dataset,
         validation_data: tf.data.Dataset,
-        save_directory: Optional[os.PathLike] = None,
+        save_path: Optional[os.PathLike] = None,
     ) -> tf.keras.callbacks.History:
         """
         Fits the model on training data. We are using an early stopping callback
@@ -164,12 +157,12 @@ class Model:
 
         :param training_data: The training data that is being used.
         :param validation_data: The validation data that is being used.
-        :param save_directory: The directory to save the model at.
+        :param save_path: The absolute path to save the model at.
         """
         checkpoint = None
-        if save_directory is not None:
+        if save_path is not None:
             checkpoint = tf.keras.callbacks.ModelCheckpoint(
-                save_directory, save_best_only=True
+                save_path, save_best_only=True
             )
 
         callbacks = [tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=5)]
@@ -179,13 +172,12 @@ class Model:
         history = self.model.fit(
             training_data,
             validation_data=validation_data,
-            epochs=self.config.model_config.num_epochs,
+            epochs=self.config.model_config.ensemble_epochs if self.model.name == "ensemble" else self.config.model_config.num_epochs,
             callbacks=callbacks,
             batch_size=self.config.model_config.batch_size,
             validation_batch_size=self.config.model_config.batch_size,
         )
 
-        self.model.save("saved_model/model")
         return history
 
     def make_predictions(self, data) -> None:
@@ -196,6 +188,47 @@ class Model:
         """
 
         return self.model.predict(data)
+
+    def load_ensemble_models(self, models: Iterable[os.PathLike]) -> None:
+        """
+        Load an ensemble of models from memory.
+
+        :param models: A list of models.
+        """
+        loaded_models = [tf.keras.models.load_model(model) for model in models]
+        
+        # freeze layers
+        for i, model in enumerate(loaded_models):
+            model._name = f"{i}"
+            for layer in model.layers:
+                layer.trainable = False
+
+        self.model = self._make_ensemble(loaded_models)
+        self.model._name = "ensemble"
+        self.model.compile(
+            loss="sparse_categorical_crossentropy",
+            optimizer=tf.keras.optimizers.Adam(
+                learning_rate=self.config.model_config.learning_rate
+            ),
+            metrics=["accuracy"],
+        )
+
+    def _make_ensemble(self, models: Iterable[tf.keras.Model]) -> tf.keras.Model:
+        """
+        Make an ensemble from a list of models!
+
+        :param models: A list of models.
+        """
+        model_input = tf.keras.layers.Input(
+            shape=(
+                self.config.dataset_config.image_width,
+                self.config.dataset_config.image_height,
+                self.config.dataset_config.num_channels,
+            )
+        )
+        model_outputs = tf.keras.layers.concatenate([model(model_input) for model in models])
+        output = tf.keras.layers.Dense(2, activation="softmax")(model_outputs)
+        return tf.keras.Model(inputs=model_input, outputs=output)
 
     def _load_model(self, path: os.PathLike) -> None:
         """
@@ -221,8 +254,7 @@ class Model:
         :return: A tuple containing a batch of images and labels.
         """
         random.seed(seed)
-        index = random.randint(0, len(data) - 1)
-        data = data.skip(index)
+        data = data.skip(random.randint(0, len(data) - 1))
         image, label = next(data.as_numpy_iterator())
         image = ep.astensor(tf.convert_to_tensor(image))
         label = ep.astensor(

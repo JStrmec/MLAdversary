@@ -58,9 +58,9 @@ class ModelConfig:
 
     batch_size: int
     seed: int
-    ensemble_size: int
     learning_rate: float
     num_epochs: int
+    ensemble_epochs: int
 
     def __init__(self, config_data: Dict[str, any]) -> None:
         model_config_data = config_data["model"]

@@ -3,7 +3,7 @@ main.py
 
 Where the entry point of the application resides.
 """
-import sys
+import random
 from typing import List, Optional, Tuple
 import tensorflow as tf
 import argparse
@@ -33,6 +33,12 @@ parser.add_argument(
     type=str,
     default="saved_model/model",
 )
+parser.add_argument(
+    "--load_ensemble",
+    help="Loads an ensemble from memory.",
+    type=str,
+    nargs="+"
+)
 args = parser.parse_args()
 
 
@@ -40,6 +46,7 @@ def main() -> None:
     """
     Script entry point.
     """
+    # enable/disable GPU access
     set_gpu_access(parsed_args=args)
 
     # load the project configuration
@@ -49,6 +56,10 @@ def main() -> None:
     # load the project data
     project_data_loader = DataLoader(project_config)
     project_data = project_data_loader.load_data(random_noise_transformation)
+
+    # set the random seed
+    random.seed(project_config.model_config.seed)
+    tf.random.set_seed(project_config.model_config.seed)
 
     # obtain model and training history
     history, model = obtain_model_for_robustness_testing(
@@ -75,8 +86,14 @@ def obtain_model_for_robustness_testing(
     history = None
     model = Model(config)
     if parsed_args.load_model is not None:
+        print("Loading a singular model from memory.")
         model = Model(config, parsed_args.load_model)
+    elif parsed_args.load_ensemble:
+        print("Loading an ensemble from memory!")
+        model.load_ensemble_models(parsed_args.load_ensemble)
+        history = model.fit_model(data.train, data.validation, parsed_args.model_output)
     else:
+        print("Training a new model")
         history = model.fit_model(data.train, data.validation, parsed_args.model_output)
     return history, model
 
@@ -115,6 +132,7 @@ def display_history_metrics(history: Optional[tf.keras.callbacks.History]) -> No
         ax[i].legend(["train", "val"])
 
     plt.savefig("output/results.png")
+    plt.close()
 
 
 def perform_attacks(
@@ -140,6 +158,7 @@ def perform_attacks(
         ],
     )
 
+
 def analyze_attack_history(attack_history: List[AttackHistory]) -> None:
     """
     Perform analysis of attack history.
@@ -164,7 +183,7 @@ def analyze_attack_history(attack_history: List[AttackHistory]) -> None:
     plt.ylabel("accuracy")
     plt.savefig("output/preturbation_comparsion.png")
     plt.clf()
-
+    plt.close()
 
 if __name__ == "__main__":
     main()
