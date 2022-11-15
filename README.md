@@ -42,6 +42,25 @@ There are a few command line arguments to be aware of...
 | model_output   | --model_output   | os.PathLike       | Outputs a model to a given path.                    |
 | load_ensemble  | --load_ensemble  | List[os.PathLike] | A list of pretrained classifiers.                   |
 
+## Results
+
+By ensembling the models, we have significantly improved the model robustness on the Linf Projected Gradient Descent Attack, Fast Gradient Descent Attack, the Deepfool Attack, the Linf Iterative Attack, and the Inversion Attack on all epsilon values.
+
+### Non-Ensembled
+
+The following is the perturbation comparison of the non-ensembled models. 
+
+![Model (seed=0)](https://github.com/Strmec01/MLAdversary/blob/main/output/model0_output/preturbation_comparsion.png?raw=true)
+
+![Model (seed=1)](https://github.com/Strmec01/MLAdversary/blob/main/output/model1_output/preturbation_comparsion.png?raw=true)
+
+![Model (seed=2)](https://github.com/Strmec01/MLAdversary/blob/main/output/model2_output/preturbation_comparsion.png?raw=true)
+
+### Ensemble
+
+This ensemble model contains the results of ensembling the above pretrained classifiers by freezing the weights of each layer and preventing them from being updated during backprop during training, and adding a dense layer to aggregate and weigh the results from each classifier. The following is the perturbation comparison: 
+
+![Ensemble Output](https://github.com/Strmec01/MLAdversary/blob/main/output/ensemble_output/preturbation_comparsion.png?raw=true)
 
 ## Project Resources
 
