@@ -28,7 +28,7 @@ class AttackHistory:
     attack_data: tf.data.Dataset
     attack_labels: tf.data.Dataset
     
-    def get_robust_accuracy(self)-> float:
+    def get_robust_accuracy(self) -> float:
         """
         Returns the robust accuracy of the attack history.
 
@@ -51,4 +51,5 @@ class AttackHistory:
         plt.plot(self.epsilons, robust_accuracy.numpy())
         plt.savefig("output/epsilons_v_robust_acc_{}.png".format(self.attack_type))
         plt.clf()
+        plt.close()
 

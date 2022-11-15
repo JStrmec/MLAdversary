@@ -2,7 +2,7 @@ title = "Model Hyperparameters"
 
 # More parameters to be added later
 [dataset]
-seed = 42
+seed = 2
 image_width = 256
 image_height = 256
 num_channels = 3
@@ -10,11 +10,11 @@ validation_split = 0.2
 test_split = 0.5
 
 [model]
-seed = 42
+seed = 2
 batch_size = 20
 learning_rate = 0.01
-num_epochs = 25
-ensemble_size = 3
+num_epochs = 10
+ensemble_epochs = 1
 
 [attack]
 epsilons = [ 0.0, 0.00025, 0.0005, 0.0008, 0.001, 0.0015, 0.0025, 0.005, 0.01, 0.05, 0.1, 0.3, 0.5, 0.8, 1.0 ]
