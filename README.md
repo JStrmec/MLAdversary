@@ -35,11 +35,12 @@ After everything sets up, you should be able to get to work. To access the termi
 
 There are a few command line arguments to be aware of...
 
-| Argument Name | Flag           | Args        | Description                                         |
-| ------------- | -------------- | ----------- | --------------------------------------------------- |
-| gpus          | --gpus         | None        | Whether to enable GPU accelerated machine learning. |
-| load_model    | --load_model   | os.PathLike | Loads a pretrained model from a path.               |
-| model_output  | --model_output | os.PathLike | Outputs a model to a given path.                    |
+| Argument Name  | Flag             | Args              | Description                                         |
+| -------------- | ---------------- | ----------------- | --------------------------------------------------- |
+| gpus           | --gpus           | None              | Whether to enable GPU accelerated machine learning. |
+| load_model     | --load_model     | os.PathLike       | Loads a pretrained model from a path.               |
+| model_output   | --model_output   | os.PathLike       | Outputs a model to a given path.                    |
+| load_ensemble  | --load_ensemble  | List[os.PathLike] | A list of pretrained classifiers.                   |
 
 
 ## Project Resources
